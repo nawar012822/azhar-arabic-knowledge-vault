@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { collections, items } from "@/data/repository";
 import { ItemCard } from "@/components/site/ItemCard";
+import logo from "@/assets/college_building.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,6 +35,7 @@ function Index() {
     <div>
       <section className="bg-hero pattern-geo text-primary-foreground">
         <div className="mx-auto max-w-4xl px-4 py-14 text-center md:py-20">
+          <img src={logo.url} alt="شعار كلية اللغة العربية بالمنوفية" className="mx-auto mb-4 h-24 w-24 rounded-full bg-card p-1 shadow-card md:h-28 md:w-28" />
           <p className="text-sm text-gold">جامعة الأزهر – فرع شبين الكوم</p>
           <h1 className="mt-3 text-3xl font-bold leading-snug md:text-5xl">المستودع الرقمي لكلية اللغة العربية</h1>
           <p className="mx-auto mt-4 max-w-2xl opacity-85">حفظ الإنتاج العلمي للكلية وتنظيمه وإتاحته للطلاب والباحثين وأعضاء هيئة التدريس.</p>
