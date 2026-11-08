@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
+import logo from "@/assets/college_building.jpg.asset.json";
 
 const nav = [
   { to: "/", label: "الرئيسية" },
@@ -15,7 +16,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-primary font-display text-xl text-primary-foreground">ض</span>
+          <img src={logo.url} alt="شعار كلية اللغة العربية بالمنوفية" className="h-11 w-11 rounded-full object-contain" />
           <span className="leading-tight">
             <span className="block font-display text-lg font-bold text-primary">المستودع الرقمي</span>
             <span className="block text-xs text-muted-foreground">كلية اللغة العربية – شبين الكوم</span>
