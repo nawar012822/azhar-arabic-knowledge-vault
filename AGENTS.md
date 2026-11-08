@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Repository records use Dublin Core field names (see src/data/repository.ts) so they can be exported to DSpace later.
+- Download permission goes through `canDownload(access, signedIn)`; never expose files for `metadata` access.
+- UI is Arabic RTL (`dir="rtl"` on <html>); use logical spacing (ps/pe, text-start).
