@@ -93,13 +93,13 @@ export function normalizeArabic(s: string): string {
 }
 
 export interface SearchQuery {
-  q?: string;
-  field?: "all" | "title" | "author" | "subject" | "keyword";
-  type?: string;
-  dept?: string;
-  from?: number;
-  to?: number;
-  sort?: "relevance" | "newest" | "oldest" | "views" | "title";
+  q?: string | undefined;
+  field?: "all" | "title" | "author" | "subject" | "keyword" | undefined;
+  type?: string | undefined;
+  dept?: string | undefined;
+  from?: number | undefined;
+  to?: number | undefined;
+  sort?: "relevance" | "newest" | "oldest" | "views" | "title" | undefined;
 }
 
 export function searchItems(query: SearchQuery, list: Item[] = items): Item[] {
