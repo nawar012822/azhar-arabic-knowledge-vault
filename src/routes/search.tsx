@@ -6,7 +6,7 @@ import { ItemCard } from "@/components/site/ItemCard";
 type S = SearchQuery;
 
 export const Route = createFileRoute("/search")({
-  validateSearch: (s: Record<string, unknown>): S => ({
+  validateSearch: (raw: Record<string, unknown>): S => { const s = raw as { q?: unknown; field?: unknown; type?: unknown; dept?: unknown; from?: unknown; to?: unknown; sort?: unknown }; return {
     q: typeof s.q === "string" ? s.q : undefined,
     field: (["all", "title", "author", "subject", "keyword"] as const).find((f) => f === s.field),
     type: typeof s.type === "string" && s.type ? s.type : undefined,
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/search")({
     from: s.from ? Number(s.from) || undefined : undefined,
     to: s.to ? Number(s.to) || undefined : undefined,
     sort: (["relevance", "newest", "oldest", "views", "title"] as const).find((f) => f === s.sort),
-  }),
+  }; },
   head: () => ({
     meta: [
       { title: "البحث المتقدم – المستودع الرقمي" },

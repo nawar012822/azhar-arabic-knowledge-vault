@@ -53,7 +53,7 @@ export interface Item {
 
 const i = (x: Partial<Item> & Pick<Item, "id" | "title" | "author" | "collection">): Item => ({
   contributors: [], subjects: [], keywords: [], date: 2020, publisher: "كلية اللغة العربية بشبين الكوم",
-  language: "العربية", abstract: "", pages: 0, department: departments[0], format: "PDF",
+  language: "العربية", abstract: "", pages: 0, department: "النحو والصرف", format: "PDF",
   rights: "جميع الحقوق محفوظة للمؤلف", access: "metadata", views: 0, addedAt: "2026-01-01", ...x,
 });
 
@@ -115,7 +115,7 @@ export function searchItems(query: SearchQuery, list: Item[] = items): Item[] {
         subject: x.subjects.join(" "),
         keyword: x.keywords.join(" "),
       };
-      const hay = normalizeArabic(field === "all" ? Object.values(parts).join(" ") + " " + x.abstract : parts[field]);
+      const hay = normalizeArabic(field === "all" ? Object.values(parts).join(" ") + " " + x.abstract : (parts[field] ?? ""));
       const title = normalizeArabic(x.title);
       let score = 0;
       for (const t of terms) {
