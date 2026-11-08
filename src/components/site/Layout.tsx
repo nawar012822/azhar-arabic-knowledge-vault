@@ -52,6 +52,9 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-8 text-sm">
         <p className="font-display text-lg">المستودع الرقمي لكلية اللغة العربية – جامعة الأزهر – فرع شبين الكوم</p>
         <p className="mt-2 opacity-80">نموذج تجريبي غير رسمي – المرحلة الأولى. البيانات المعروضة تجريبية لأغراض العرض.</p>
+        <p className="mt-4 border-t border-primary-foreground/20 pt-4 opacity-90">
+          © {new Date().getFullYear()} جميع حقوق النشر محفوظة لـ <strong>أحمد محمود نوار</strong> – طالب بكلية اللغة العربية بالمنوفية، جامعة الأزهر – شعبة المكتبات.
+        </p>
       </div>
     </footer>
   );
