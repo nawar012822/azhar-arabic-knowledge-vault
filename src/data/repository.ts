@@ -49,7 +49,23 @@ export interface Item {
   access: AccessLevel;
   views: number;
   addedAt: string;
+  uid?: string; // معرف قاعدة البيانات
+  filePath?: string | null;
+  downloads?: number;
+  isbn?: string | null;
+  orcid?: string | null;
+  status?: ItemStatus;
+  reviewNote?: string | null;
+  submittedBy?: string | null;
 }
+
+export type ItemStatus = "pending" | "approved" | "revision" | "rejected";
+export const statusLabels: Record<ItemStatus, string> = {
+  pending: "قيد المراجعة",
+  approved: "معتمد ومنشور",
+  revision: "مطلوب تعديل",
+  rejected: "مرفوض",
+};
 
 const i = (x: Partial<Item> & Pick<Item, "id" | "title" | "author" | "collection">): Item => ({
   contributors: [], subjects: [], keywords: [], date: 2020, publisher: "كلية اللغة العربية بشبين الكوم",
