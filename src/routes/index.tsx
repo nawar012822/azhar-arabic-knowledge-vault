@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { collections, items } from "@/data/repository";
+import { useQuery } from "@tanstack/react-query";
+import { publishedItemsQuery } from "@/lib/db";
+import { collections } from "@/data/repository";
 import { ItemCard } from "@/components/site/ItemCard";
 import logo from "@/assets/college_building.jpg.asset.json";
 
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
+  const items = useQuery(publishedItemsQuery).data ?? [];
   const latest = [...items].sort((a, b) => b.addedAt.localeCompare(a.addedAt)).slice(0, 4);
   const popular = [...items].sort((a, b) => b.views - a.views).slice(0, 4);
   const count = (c: string) => items.filter((x) => x.collection === c).length;

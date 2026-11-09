@@ -1,4 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { publishedItemsQuery } from "@/lib/db";
 import { getCollection, searchItems } from "@/data/repository";
 import { PageShell } from "@/components/site/Layout";
 import { ItemCard } from "@/components/site/ItemCard";
@@ -19,7 +21,8 @@ export const Route = createFileRoute("/collections/$slug")({
 
 function CollectionPage() {
   const { collection } = Route.useLoaderData();
-  const list = searchItems({ type: collection.slug, sort: "newest" });
+  const all = useQuery(publishedItemsQuery).data ?? [];
+  const list = searchItems({ type: collection.slug, sort: "newest" }, all);
   return (
     <PageShell title={`${collection.icon} ${collection.title}`} subtitle={collection.description}>
       {list.length === 0 ? (
