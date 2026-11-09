@@ -1,4 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { publishedItemsQuery } from "@/lib/db";
 import { collections, departments, searchItems, type SearchQuery } from "@/data/repository";
 import { PageShell } from "@/components/site/Layout";
 import { ItemCard } from "@/components/site/ItemCard";
@@ -31,7 +33,8 @@ const input = "w-full rounded-md border bg-card px-3 py-2 text-sm";
 function SearchPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/search" });
-  const results = searchItems(search);
+  const all = useQuery(publishedItemsQuery).data ?? [];
+  const results = searchItems(search, all);
   const set = (patch: Partial<S>) => navigate({ search: (p) => ({ ...p, ...patch }) });
 
   return (
