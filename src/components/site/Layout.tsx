@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/college_building.jpg.asset.json";
 
 const nav = [
@@ -11,18 +10,9 @@ const nav = [
   { to: "/contact", label: "اتصل بنا" },
 ] as const;
 
-function AccountLinks({ onClick }: { onClick?: () => void }) {
-  const { user, isStaff, loading } = useAuth();
-  if (loading) return null;
-  const c = "rounded-md px-3 py-2 text-sm hover:bg-muted block md:inline-block";
-  if (!user) return <Link to="/auth" onClick={onClick} className={`${c} bg-primary text-primary-foreground hover:bg-primary/90`}>تسجيل الدخول</Link>;
-  return (
-    <>
-      <Link to="/submit" onClick={onClick} className={c}>إيداع مادة</Link>
-      <Link to="/my" onClick={onClick} className={c}>حسابي</Link>
-      {isStaff && <Link to="/admin" onClick={onClick} className={`${c} font-semibold text-primary`}>لوحة التحكم</Link>}
-    </>
-  );
+// روابط الحساب تُضاف عند إنشاء صفحات تسجيل الدخول ولوحة التحكم.
+function AccountLinks(_: { onClick?: () => void }) {
+  return null;
 }
 
 export function SiteHeader() {
