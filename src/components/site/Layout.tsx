@@ -13,7 +13,7 @@ const nav = [
   { to: "/contact", label: "اتصل بنا" },
 ] as const;
 
-const linkCls = "block rounded-md px-3 py-3 text-sm hover:bg-muted md:py-2";
+const linkCls = "block rounded-md px-3 py-3 text-sm hover:bg-muted lg:py-2";
 
 function AccountLinks({ onClick }: { onClick?: () => void }) {
   const { user, isStaff, loading } = useAuth();
@@ -22,7 +22,7 @@ function AccountLinks({ onClick }: { onClick?: () => void }) {
   if (loading) return null;
   if (!user)
     return (
-      <Link to="/auth" onClick={onClick} className="block rounded-md bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground md:py-2">
+      <Link to="/auth" onClick={onClick} className="block rounded-md bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground lg:py-2">
         تسجيل الدخول
       </Link>
     );
@@ -38,7 +38,7 @@ function AccountLinks({ onClick }: { onClick?: () => void }) {
       <Link to="/submit" onClick={onClick} className={`${linkCls} font-semibold text-gold`}>+ إيداع مادة</Link>
       <Link to="/my" onClick={onClick} className={linkCls}>حسابي</Link>
       {isStaff && <Link to="/admin" onClick={onClick} className={`${linkCls} text-primary`}>لوحة التحكم</Link>}
-      <button onClick={signOut} className={`${linkCls} w-full text-start text-destructive md:w-auto`}>خروج</button>
+      <button onClick={signOut} className={`${linkCls} w-full text-start text-destructive lg:w-auto`}>خروج</button>
     </>
   );
 }
