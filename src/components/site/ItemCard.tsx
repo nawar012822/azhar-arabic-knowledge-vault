@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { accessLabels, getCollection, type AccessLevel, type Item } from "@/data/repository";
+import { accessLabels, getCollection, statusLabels, type AccessLevel, type Item, type ItemStatus } from "@/data/repository";
 
 const accessStyle: Record<AccessLevel, string> = {
   open: "bg-success/15 text-success",
@@ -9,6 +9,17 @@ const accessStyle: Record<AccessLevel, string> = {
 
 export function AccessBadge({ access }: { access: AccessLevel }) {
   return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${accessStyle[access]}`}>{accessLabels[access]}</span>;
+}
+
+const statusStyle: Record<ItemStatus, string> = {
+  pending: "bg-warning/15 text-warning",
+  approved: "bg-success/15 text-success",
+  revision: "bg-accent text-accent-foreground",
+  rejected: "bg-destructive/15 text-destructive",
+};
+
+export function StatusBadge({ status }: { status: ItemStatus }) {
+  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyle[status]}`}>{statusLabels[status]}</span>;
 }
 
 export function ItemCard({ item }: { item: Item }) {

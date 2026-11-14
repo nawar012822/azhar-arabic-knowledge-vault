@@ -6,8 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { favoritesQuery, myItemsQuery, profileQuery } from "@/lib/db";
 import { roleLabels } from "@/lib/permissions";
-import { getCollection, statusLabels, type ItemStatus } from "@/data/repository";
-import { ItemCard, AccessBadge } from "@/components/site/ItemCard";
+import { getCollection } from "@/data/repository";
+import { ItemCard, AccessBadge, StatusBadge } from "@/components/site/ItemCard";
 import { PageShell } from "@/components/site/Layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,13 +24,6 @@ export const Route = createFileRoute("/_authenticated/my")({
   }),
   component: MyPage,
 });
-
-export const statusStyle: Record<ItemStatus, string> = {
-  pending: "bg-warning/15 text-warning",
-  approved: "bg-success/15 text-success",
-  revision: "bg-accent text-accent-foreground",
-  rejected: "bg-destructive/15 text-destructive",
-};
 
 function MyPage() {
   const { user, roles } = useAuth();
@@ -93,7 +86,7 @@ function MySubmissions({ userId }: { userId: string }) {
           {data.map((it) => (
             <li key={it.id} className="rounded-lg border bg-card p-4">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className={`rounded-full px-2.5 py-0.5 font-medium ${statusStyle[it.status ?? "pending"]}`}>{statusLabels[it.status ?? "pending"]}</span>
+                <StatusBadge status={it.status ?? "pending"} />
                 <AccessBadge access={it.access} />
                 <span className="text-muted-foreground">{getCollection(it.collection)?.title}</span>
               </div>
