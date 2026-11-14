@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import type { Role } from "@/lib/permissions";
 
-type Role = "admin" | "moderator" | "user";
 interface AuthState {
   user: User | null;
   roles: Role[];
@@ -29,7 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     supabase.auth.getUser().then(({ data }) => load(data.user));
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") void load(session?.user ?? null);
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        // defer: avoid calling Supabase inside the auth callback
+        setTimeout(() => void load(session?.user ?? null), 0);
+      }
     });
     return () => sub.subscription.unsubscribe();
   }, []);

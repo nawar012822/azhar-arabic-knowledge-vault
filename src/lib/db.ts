@@ -58,3 +58,44 @@ export const itemQuery = (identifier: string) =>
   });
 
 export const departmentsList = ["النحو والصرف", "البلاغة والنقد", "الأدب والنقد", "أصول اللغة", "التاريخ والحضارة"];
+
+/** كل المواد بكل حالاتها (للمشرفين؛ قواعد قاعدة البيانات تمنع غيرهم). */
+export const allItemsQuery = queryOptions({
+  queryKey: ["items", "all"],
+  queryFn: async () => {
+    const { data, error } = await supabase.from("items").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []).map(rowToItem);
+  },
+});
+
+/** مواد أودعها المستخدم بنفسه. */
+export const myItemsQuery = (userId: string) =>
+  queryOptions({
+    queryKey: ["items", "mine", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("items").select("*").eq("submitted_by", userId).order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(rowToItem);
+    },
+  });
+
+export const favoritesQuery = (userId: string) =>
+  queryOptions({
+    queryKey: ["favorites", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("favorites").select("item_id, items(*)").eq("user_id", userId).order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []).flatMap((f) => (f.items ? [rowToItem(f.items as ItemRow)] : []));
+    },
+  });
+
+export const profileQuery = (userId: string) =>
+  queryOptions({
+    queryKey: ["profile", userId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
