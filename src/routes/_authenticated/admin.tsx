@@ -102,7 +102,7 @@ function AllItems() {
     if (!confirm(`حذف «${it.title}» نهائيًا؟`)) return;
     if (it.filePath) await supabase.storage.from("files").remove([it.filePath]);
     const { error } = await supabase.from("items").delete().eq("id", it.uid!);
-    if (error) return toast.error("تعذر الحذف.");
+    if (error) { toast.error("تعذر الحذف."); return; }
     toast.success("تم الحذف.");
     qc.invalidateQueries({ queryKey: ["items"] });
   };
@@ -160,7 +160,7 @@ function UsersPanel() {
     const res = on
       ? await supabase.from("user_roles").upsert({ user_id: m.id, role, department: department ?? null }, { onConflict: "user_id,role" })
       : await supabase.from("user_roles").delete().eq("user_id", m.id).eq("role", role);
-    if (res.error) return toast.error(res.error.message.includes("آخر مدير") ? res.error.message : "تعذر تعديل الصلاحية.");
+    if (res.error) { toast.error(res.error.message.includes("آخر مدير") ? res.error.message : "تعذر تعديل الصلاحية."); return; }
     toast.success("تم تحديث الصلاحيات.");
     refresh();
   };

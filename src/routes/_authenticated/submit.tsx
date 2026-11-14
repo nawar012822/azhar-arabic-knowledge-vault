@@ -62,7 +62,7 @@ function SubmitPage() {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!agree) return toast.error("يجب الإقرار بحقوق الإيداع أولًا.");
+    if (!agree) { toast.error("يجب الإقرار بحقوق الإيداع أولًا."); return; }
     setBusy(true);
     try {
       let file_path: string | null = null;
