@@ -17,6 +17,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedMyRouteImport } from './routes/_authenticated/my'
 import { Route as AuthenticatedSubmitRouteImport } from './routes/_authenticated/submit'
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
@@ -61,6 +62,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMyRoute = AuthenticatedMyRouteImport.update({
   id: '/my',
   path: '/my',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/my': typeof AuthenticatedMyRoute
   '/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/my': typeof AuthenticatedMyRoute
   '/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/policy': typeof PolicyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/my': typeof AuthenticatedMyRoute
   '/_authenticated/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/policy'
     | '/reset-password'
     | '/search'
+    | '/admin'
     | '/my'
     | '/submit'
     | '/collections/$slug'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/policy'
     | '/reset-password'
     | '/search'
+    | '/admin'
     | '/my'
     | '/submit'
     | '/collections/$slug'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/policy'
     | '/reset-password'
     | '/search'
+    | '/_authenticated/admin'
     | '/_authenticated/my'
     | '/_authenticated/submit'
     | '/collections/$slug'
@@ -237,6 +249,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/my': {
       id: '/_authenticated/my'
       path: '/my'
@@ -269,11 +288,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMyRoute: typeof AuthenticatedMyRoute
   AuthenticatedSubmitRoute: typeof AuthenticatedSubmitRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMyRoute: AuthenticatedMyRoute,
   AuthenticatedSubmitRoute: AuthenticatedSubmitRoute,
 }
