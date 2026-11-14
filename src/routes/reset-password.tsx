@@ -27,7 +27,7 @@ function ResetPage() {
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
     setBusy(false);
-    if (error) return toast.error("تعذر تغيير كلمة المرور. افتح الرابط من بريدك مرة أخرى.");
+    if (error) { toast.error("تعذر تغيير كلمة المرور. افتح الرابط من بريدك مرة أخرى."); return; }
     toast.success("تم تغيير كلمة المرور.");
     navigate({ to: "/my" });
   };
