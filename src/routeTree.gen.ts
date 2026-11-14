@@ -18,6 +18,7 @@ import { Route as PolicyRouteImport } from './routes/policy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as AuthenticatedMyRouteImport } from './routes/_authenticated/my'
+import { Route as AuthenticatedSubmitRouteImport } from './routes/_authenticated/submit'
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as ItemsIdRouteImport } from './routes/items.$id'
 
@@ -65,6 +66,11 @@ const AuthenticatedMyRoute = AuthenticatedMyRouteImport.update({
   path: '/my',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSubmitRoute = AuthenticatedSubmitRouteImport.update({
+  id: '/submit',
+  path: '/submit',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const CollectionsSlugRoute = CollectionsSlugRouteImport.update({
   id: '/collections/$slug',
   path: '/collections/$slug',
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/my': typeof AuthenticatedMyRoute
+  '/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/items/$id': typeof ItemsIdRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/my': typeof AuthenticatedMyRoute
+  '/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/items/$id': typeof ItemsIdRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/search': typeof SearchRoute
   '/_authenticated/my': typeof AuthenticatedMyRoute
+  '/_authenticated/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/items/$id': typeof ItemsIdRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/my'
+    | '/submit'
     | '/collections/$slug'
     | '/items/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/my'
+    | '/submit'
     | '/collections/$slug'
     | '/items/$id'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/search'
     | '/_authenticated/my'
+    | '/_authenticated/submit'
     | '/collections/$slug'
     | '/items/$id'
   fileRoutesById: FileRoutesById
@@ -232,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/submit': {
+      id: '/_authenticated/submit'
+      path: '/submit'
+      fullPath: '/submit'
+      preLoaderRoute: typeof AuthenticatedSubmitRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/collections/$slug': {
       id: '/collections/$slug'
       path: '/collections/$slug'
@@ -251,10 +270,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMyRoute: typeof AuthenticatedMyRoute
+  AuthenticatedSubmitRoute: typeof AuthenticatedSubmitRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMyRoute: AuthenticatedMyRoute,
+  AuthenticatedSubmitRoute: AuthenticatedSubmitRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
