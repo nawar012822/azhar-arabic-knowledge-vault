@@ -1,6 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 import logo from "@/assets/college_building.jpg.asset.json";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const nav = [
   { to: "/", label: "الرئيسية" },
@@ -10,16 +13,41 @@ const nav = [
   { to: "/contact", label: "اتصل بنا" },
 ] as const;
 
-// روابط الحساب تُضاف عند إنشاء صفحات تسجيل الدخول ولوحة التحكم.
-function AccountLinks(_: { onClick?: () => void }) {
-  return null;
+const linkCls = "block rounded-md px-3 py-3 text-sm hover:bg-muted md:py-2";
+
+function AccountLinks({ onClick }: { onClick?: () => void }) {
+  const { user, isStaff, loading } = useAuth();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  if (loading) return null;
+  if (!user)
+    return (
+      <Link to="/auth" onClick={onClick} className="block rounded-md bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground md:py-2">
+        تسجيل الدخول
+      </Link>
+    );
+  const signOut = async () => {
+    onClick?.();
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  };
+  return (
+    <>
+      <Link to="/submit" onClick={onClick} className={`${linkCls} font-semibold text-gold`}>+ إيداع مادة</Link>
+      <Link to="/my" onClick={onClick} className={linkCls}>حسابي</Link>
+      {isStaff && <Link to="/admin" onClick={onClick} className={`${linkCls} text-primary`}>لوحة التحكم</Link>}
+      <button onClick={signOut} className={`${linkCls} w-full text-start text-destructive md:w-auto`}>خروج</button>
+    </>
+  );
 }
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-30 border-b bg-card/95 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="flex items-center gap-3">
           <img src={logo.url} alt="شعار كلية اللغة العربية بالمنوفية" className="h-11 w-11 rounded-full object-contain" />
           <span className="leading-tight">
@@ -27,7 +55,7 @@ export function SiteHeader() {
             <span className="block text-xs text-muted-foreground">كلية اللغة العربية – شبين الكوم</span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1 lg:flex">
           {nav.map((n) => (
             <Link key={n.to} to={n.to} className="rounded-md px-3 py-2 text-sm text-foreground hover:bg-muted" activeProps={{ className: "bg-muted font-semibold text-primary" }} activeOptions={{ exact: true }}>
               {n.label}
@@ -35,12 +63,12 @@ export function SiteHeader() {
           ))}
           <AccountLinks />
         </nav>
-        <button className="rounded-md border px-3 py-2 text-sm md:hidden" onClick={() => setOpen(!open)} aria-label="القائمة">
+        <button className="rounded-md border px-3 py-2 text-sm lg:hidden" onClick={() => setOpen(!open)} aria-label="القائمة">
           ☰
         </button>
       </div>
       {open && (
-        <nav className="border-t px-4 py-2 md:hidden">
+        <nav className="border-t px-4 py-2 lg:hidden">
           {nav.map((n) => (
             <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-3 text-sm hover:bg-muted">
               {n.label}
