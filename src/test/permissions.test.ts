@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { canDeleteItems, canManageUsers, canReview, defaultAccessFor, initialStatus } from "@/lib/permissions";
+import { canDeleteItems, canManageUsers, canReview, canRemoveAdmin, defaultAccessFor, initialStatus } from "@/lib/permissions";
 
 describe("roles and permissions", () => {
+  it("keeps the last administrator and allows a handover after adding another", () => {
+    expect(canRemoveAdmin(1)).toBe(false);
+    expect(canRemoveAdmin(2)).toBe(true);
+  });
   it("only admins manage users and delete items", () => {
     expect(canManageUsers(["admin", "user"])).toBe(true);
     expect(canManageUsers(["moderator", "user"])).toBe(false);
