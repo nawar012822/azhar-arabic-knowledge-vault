@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Role } from "@/lib/permissions";
+import { useQuery } from "@tanstack/react-query";
 
 interface AuthState {
   user: User | null;
@@ -15,16 +16,22 @@ const Ctx = createContext<AuthState>({ user: null, roles: [], loading: true, isA
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
+  const rolesQuery = useQuery({
+    queryKey: ["roles", user?.id],
+    enabled: Boolean(user),
+    queryFn: async (): Promise<Role[]> => {
+      if (!user) return [];
+      const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      if (error) throw error;
+      return (data ?? []).map((r) => r.role as Role);
+    },
+  });
+  const roles = user ? rolesQuery.data ?? [] : [];
 
   useEffect(() => {
     const load = async (u: User | null) => {
       setUser(u);
-      if (u) {
-        const { data } = await supabase.from("user_roles").select("role").eq("user_id", u.id);
-        setRoles((data ?? []).map((r) => r.role as Role));
-      } else setRoles([]);
       setLoading(false);
     };
     supabase.auth.getUser().then(({ data }) => load(data.user));
@@ -38,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const isAdmin = roles.includes("admin");
-  return <Ctx.Provider value={{ user, roles, loading, isAdmin, isStaff: isAdmin || roles.includes("moderator") }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, roles, loading: loading || (Boolean(user) && rolesQuery.isLoading), isAdmin, isStaff: isAdmin || roles.includes("moderator") }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);

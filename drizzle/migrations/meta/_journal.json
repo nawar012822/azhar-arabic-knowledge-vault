@@ -8,6 +8,13 @@
       "when": 1794183805916,
       "tag": "0000_repository_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794846742390,
+      "tag": "0001_protect_last_administrator",
+      "breakpoints": true
     }
   ]
 }

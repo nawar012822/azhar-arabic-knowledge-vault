@@ -13,6 +13,7 @@ export const canReview = (roles: Role[]) => roles.includes("admin") || roles.inc
 /** المدير العام وحده يدير المستخدمين والصلاحيات ويحذف المواد. */
 export const canManageUsers = (roles: Role[]) => roles.includes("admin");
 export const canDeleteItems = (roles: Role[]) => roles.includes("admin");
+export const canRemoveAdmin = (adminCount: number) => adminCount > 1;
 /** أي عضو مسجل يستطيع الإيداع. */
 export const canSubmit = (roles: Role[]) => roles.length > 0;
 

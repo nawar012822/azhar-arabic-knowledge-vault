@@ -1,4 +1,5 @@
 import type { Item } from "@/data/repository";
+import { downloadBlob } from "@/lib/download";
 
 export type CitationStyle = "apa" | "mla" | "chicago" | "harvard" | "bibtex";
 export const citationLabels: Record<CitationStyle, string> = {
@@ -42,8 +43,5 @@ export function toDublinCoreXML(x: Item): string {
 }
 
 export function downloadText(filename: string, text: string, mime = "text/plain") {
-  const url = URL.createObjectURL(new Blob([text], { type: `${mime};charset=utf-8` }));
-  const a = document.createElement("a");
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
+  downloadBlob(new Blob([text], { type: `${mime};charset=utf-8` }), filename);
 }

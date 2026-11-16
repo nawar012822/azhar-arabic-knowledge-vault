@@ -5,11 +5,13 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { allItemsQuery } from "@/lib/db";
-import { roleLabels, type Role } from "@/lib/permissions";
+import { canRemoveAdmin, roleLabels, type Role } from "@/lib/permissions";
 import { accessLabels, collections, departments, getCollection, statusLabels, type AccessLevel, type Item, type ItemStatus } from "@/data/repository";
 import { AccessBadge, StatusBadge } from "@/components/site/ItemCard";
 import { PageShell } from "@/components/site/Layout";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { downloadText, toDublinCoreXML } from "@/lib/citation";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -153,9 +155,14 @@ function UsersPanel() {
     },
   });
   const [q, setQ] = useState("");
-  const refresh = () => qc.invalidateQueries({ queryKey: ["members"] });
+  const adminCount = members.filter((m) => m.roles.some((r) => r.role === "admin")).length;
+  const refresh = () => {
+    void qc.invalidateQueries({ queryKey: ["members"] });
+    void qc.invalidateQueries({ queryKey: ["roles"] });
+  };
 
   const toggle = async (m: Member, role: Role, on: boolean, department?: string | null) => {
+    if (!on && role === "admin" && !canRemoveAdmin(adminCount)) { toast.error("لا يمكن إزالة صلاحية آخر مدير عام. أضف مديرًا آخر أولًا."); return; }
     if (!on && role === "admin" && m.id === user?.id && !confirm("ستزيل صلاحية المدير العام من حسابك أنت. متأكد؟")) return;
     const res = on
       ? await supabase.from("user_roles").upsert({ user_id: m.id, role, department: department ?? null }, { onConflict: "user_id,role" })
@@ -196,7 +203,7 @@ function UsersPanel() {
                     {departments.map((d) => <option key={d}>{d}</option>)}
                   </select>
                 )}
-                <label className="flex items-center gap-2"><input type="checkbox" checked={has("admin")} onChange={(e) => toggle(m, "admin", e.target.checked)} /> مدير عام</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={has("admin")} disabled={has("admin") && !canRemoveAdmin(adminCount)} title={has("admin") && !canRemoveAdmin(adminCount) ? "أضف مديرًا آخر قبل إزالة آخر مدير" : "مدير عام"} onChange={(e) => toggle(m, "admin", e.target.checked)} /> مدير عام</label>
               </div>
             </div>
           );
@@ -216,6 +223,10 @@ function Stats() {
   const top = [...data].sort((a, b) => b.views - a.views).slice(0, 5);
   return (
     <div className="space-y-8">
+      <Button variant="outline" onClick={() => {
+        const records = data.map((item) => toDublinCoreXML(item).replace(/^<\?xml[^>]*>\s*/, "")).join("\n");
+        downloadText("repository-dublin-core.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<repository>\n${records}\n</repository>`, "application/xml");
+      }}>تصدير بيانات المستودع (Dublin Core)</Button>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         {cards.map(([l, v]) => <div key={l} className="rounded-lg border bg-card p-4 text-center"><div className="text-2xl font-bold text-primary">{v.toLocaleString("ar-EG")}</div><div className="text-xs text-muted-foreground">{l}</div></div>)}
       </div>

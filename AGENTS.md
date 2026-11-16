@@ -33,3 +33,7 @@ use the editor.
 - Repository records use Dublin Core field names (see src/data/repository.ts) so they can be exported to DSpace later.
 - Download permission goes through `canDownload(access, signedIn)`; never expose files for `metadata` access.
 - UI is Arabic RTL (`dir="rtl"` on <html>); use logical spacing (ps/pe, text-start).
+- Load item detail records client-side through the shared query cache so owner/staff visibility uses the current authenticated session.
+- Deliver private files as permission-scoped cached Blobs; download clicks stay synchronous for mobile and PDF rendering imports its matching worker dynamically.
+- Enforce last-administrator protection in a database trigger as well as the UI so direct and concurrent requests cannot bypass handover safety.
+- Cache role reads by user ID and invalidate them after role changes so account navigation reflects current permissions.
