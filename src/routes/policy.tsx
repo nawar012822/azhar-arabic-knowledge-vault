@@ -4,6 +4,8 @@ import { PageShell } from "@/components/site/Layout";
 export const Route = createFileRoute("/policy")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "سياسة الاستخدام وحقوق الملكية الفكرية – المستودع الرقمي" },
       { name: "description", content: "مستويات الإتاحة وحقوق المؤلفين وشروط استخدام مواد المستودع." },
       { property: "og:title", content: "سياسة الاستخدام وحقوق الملكية الفكرية" },
@@ -21,7 +23,7 @@ function Policy() {
           <h2 className="text-2xl font-bold text-primary">مستويات الإتاحة</h2>
           <ul className="mt-2 list-disc space-y-1 ps-6">
             <li><strong>متاح مفتوح:</strong> يمكن للجميع عرض الملف وتحميله.</li>
-            <li><strong>مقيد:</strong> العرض والتحميل للمستخدمين المسجلين من منسوبي الكلية.</li>
+            <li><strong>مقيد:</strong> العرض والتحميل للمستخدمين المسجلين.</li>
             <li><strong>بيانات وصفية فقط:</strong> يظهر وصف المادة دون إتاحة الملف.</li>
           </ul>
         </section>
@@ -35,11 +37,11 @@ function Policy() {
         </section>
         <section>
           <h2 className="text-2xl font-bold text-primary">الخصوصية</h2>
-          <p>لا تُعرض بيانات المستخدمين الشخصية للعامة، وتُحمى حسابات الإدارة، وتُحفظ نسخ احتياطية دورية للبيانات والملفات.</p>
+          <p>لا تُعرض بيانات المستخدمين الشخصية للعامة، وتُحمى حسابات الإدارة، ويقتصر الاطلاع على رسائل التواصل على مرسلها والمدير العام.</p>
         </section>
         <section>
           <h2 className="text-2xl font-bold text-primary">طلب إزالة مادة</h2>
-          <p>إذا رأيت أن مادة منشورة تمس حقًا لك، تواصل معنا من صفحة «اتصل بنا» وسيُحجب الملف فورًا حتى تتم المراجعة.</p>
+          <p>إذا رأيت أن مادة منشورة تمس حقًا لك، تواصل معنا من صفحة «اتصل بنا» ليراجع المدير الطلب ويتخذ الإجراء المناسب.</p>
         </section>
       </div>
     </PageShell>

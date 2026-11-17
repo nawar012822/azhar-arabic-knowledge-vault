@@ -14,6 +14,11 @@ export const canReview = (roles: Role[]) => roles.includes("admin") || roles.inc
 export const canManageUsers = (roles: Role[]) => roles.includes("admin");
 export const canDeleteItems = (roles: Role[]) => roles.includes("admin");
 export const canRemoveAdmin = (adminCount: number) => adminCount > 1;
+/** الأعضاء يعدّلون موادهم قيد المراجعة أو المطلوبة للتعديل؛ المشرفون يعدّلون كل المواد. */
+export function canEditItem(roles: Role[], userId: string | undefined, ownerId: string | null | undefined, status: ItemStatus | undefined) {
+  if (!userId) return false;
+  return canReview(roles) || (userId === ownerId && (status === "pending" || status === "revision"));
+}
 /** أي عضو مسجل يستطيع الإيداع. */
 export const canSubmit = (roles: Role[]) => roles.length > 0;
 

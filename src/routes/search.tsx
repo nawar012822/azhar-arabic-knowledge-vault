@@ -19,6 +19,8 @@ export const Route = createFileRoute("/search")({
   }; },
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "البحث المتقدم – المستودع الرقمي" },
       { name: "description", content: "ابحث في مواد المستودع بالعنوان والمؤلف والموضوع والسنة والقسم." },
       { property: "og:title", content: "البحث المتقدم – المستودع الرقمي" },

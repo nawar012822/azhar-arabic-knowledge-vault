@@ -12,10 +12,13 @@ import { PageShell } from "@/components/site/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { downloadText, toDublinCoreXML } from "@/lib/citation";
+import { contactSubjects, type ContactSubject } from "@/lib/contact";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "لوحة التحكم – المستودع الرقمي" },
       { name: "description", content: "مراجعة الإيداعات وإدارة المواد والأعضاء والصلاحيات في المستودع الرقمي." },
       { property: "og:title", content: "لوحة التحكم – المستودع الرقمي" },
@@ -26,7 +29,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "review" | "items" | "users" | "stats";
+type Tab = "review" | "items" | "users" | "stats" | "messages";
 
 function AdminPage() {
   const { isStaff, isAdmin, loading } = useAuth();
@@ -38,17 +41,18 @@ function AdminPage() {
         <p className="rounded-lg border bg-card p-6 text-center">هذه الصفحة للمدير والمشرفين فقط.</p>
       </PageShell>
     );
-  const tabs: [Tab, string][] = [["review", "صندوق المراجعة"], ["items", "كل المواد"], ...(isAdmin ? ([["users", "الأعضاء والصلاحيات"]] as [Tab, string][]) : []), ["stats", "الإحصائيات"]];
+  const tabs: [Tab, string][] = [["review", "صندوق المراجعة"], ["items", "كل المواد"], ...(isAdmin ? ([["users", "الأعضاء والصلاحيات"], ["messages", "الرسائل"]] as [Tab, string][]) : []), ["stats", "الإحصائيات"]];
   return (
     <PageShell title="لوحة التحكم" subtitle={isAdmin ? "المدير العام – صلاحيات كاملة" : "مشرف ومراجع"}>
       <div className="mb-6 flex gap-1 overflow-x-auto rounded-lg bg-muted p-1">
         {tabs.map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)} className={`whitespace-nowrap rounded-md px-4 py-2 text-sm ${tab === k ? "bg-card font-semibold text-primary shadow-sm" : "text-muted-foreground"}`}>{l}</button>
+          <Button variant={tab === k ? "secondary" : "ghost"} key={k} onClick={() => setTab(k)} className="shrink-0">{l}</Button>
         ))}
       </div>
       {tab === "review" && <ReviewQueue />}
       {tab === "items" && <AllItems />}
       {tab === "users" && isAdmin && <UsersPanel />}
+      {tab === "messages" && isAdmin && <MessagesPanel />}
       {tab === "stats" && <Stats />}
     </PageShell>
   );
@@ -57,7 +61,8 @@ function AdminPage() {
 function useUpdateItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ uid, patch }: { uid: string; patch: { status?: ItemStatus; access?: AccessLevel; review_note?: string | null; collection?: string } }) => {
+    mutationFn: async ({ uid, patch }: { uid?: string; patch: { status?: ItemStatus; access?: AccessLevel; review_note?: string | null; collection?: string } }) => {
+      if (!uid) throw new Error("المادة غير موجودة.");
       const { error } = await supabase.from("items").update(patch).eq("id", uid);
       if (error) throw error;
     },
@@ -77,15 +82,15 @@ function ReviewQueue() {
     <ul className="space-y-4">
       {queue.map((it) => (
         <li key={it.id} className="rounded-xl border bg-card p-5">
-          <div className="flex flex-wrap items-center gap-2"><StatusBadge status={it.status!} /><AccessBadge access={it.access} /><span className="text-xs text-muted-foreground">{getCollection(it.collection)?.title} • {it.addedAt}</span></div>
+          <div className="flex flex-wrap items-center gap-2"><StatusBadge status={it.status ?? "pending"} /><AccessBadge access={it.access} /><span className="text-xs text-muted-foreground">{getCollection(it.collection)?.title} • {it.addedAt}</span></div>
           <Link to="/items/$id" params={{ id: it.id }} className="mt-2 block font-display text-lg font-bold text-primary">{it.title}</Link>
           <p className="text-sm text-muted-foreground">{it.author} • {it.department} • {it.filePath ? "📎 مرفق ملف" : "بدون ملف"}</p>
           {it.abstract && <p className="mt-2 line-clamp-3 text-sm leading-7">{it.abstract}</p>}
           <Input className="mt-3" placeholder="ملاحظة للمودِع (اختياري، مطلوبة عند طلب التعديل أو الرفض)" value={notes[it.id] ?? it.reviewNote ?? ""} onChange={(e) => setNotes({ ...notes, [it.id]: e.target.value })} />
           <div className="mt-3 flex flex-wrap gap-2">
-            <button onClick={() => update.mutate({ uid: it.uid!, patch: { status: "approved", review_note: notes[it.id] || null } })} className="rounded-md bg-success px-4 py-2 text-sm font-semibold text-primary-foreground">✓ اعتماد ونشر</button>
-            <button onClick={() => update.mutate({ uid: it.uid!, patch: { status: "revision", review_note: notes[it.id] || "يرجى مراجعة البيانات" } })} className="rounded-md border border-warning px-4 py-2 text-sm text-warning">طلب تعديل</button>
-            <button onClick={() => update.mutate({ uid: it.uid!, patch: { status: "rejected", review_note: notes[it.id] || null } })} className="rounded-md border border-destructive px-4 py-2 text-sm text-destructive">رفض</button>
+            <Button disabled={update.isPending} onClick={() => update.mutate({ uid: it.uid, patch: { status: "approved", review_note: notes[it.id] || null } })}>✓ اعتماد ونشر</Button>
+            <Button variant="outline" disabled={update.isPending} onClick={() => update.mutate({ uid: it.uid, patch: { status: "revision", review_note: notes[it.id] || "يرجى مراجعة البيانات" } })}>طلب تعديل</Button>
+            <Button variant="destructive" disabled={update.isPending} onClick={() => update.mutate({ uid: it.uid, patch: { status: "rejected", review_note: notes[it.id] || null } })}>رفض</Button>
           </div>
         </li>
       ))}
@@ -101,9 +106,10 @@ function AllItems() {
   const [q, setQ] = useState("");
   const shown = data.filter((x) => !q || x.title.includes(q) || x.author.includes(q) || x.id.includes(q));
   const remove = async (it: Item) => {
+    if (!it.uid) return;
     if (!confirm(`حذف «${it.title}» نهائيًا؟`)) return;
     if (it.filePath) await supabase.storage.from("files").remove([it.filePath]);
-    const { error } = await supabase.from("items").delete().eq("id", it.uid!);
+    const { error } = await supabase.from("items").delete().eq("id", it.uid);
     if (error) { toast.error("تعذر الحذف."); return; }
     toast.success("تم الحذف.");
     qc.invalidateQueries({ queryKey: ["items"] });
@@ -119,16 +125,17 @@ function AllItems() {
               <p className="text-xs text-muted-foreground">{it.id} • {it.author} • 👁 {it.views} • ⬇ {it.downloads ?? 0}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <select className="h-9 rounded-md border bg-background px-2" value={it.status} onChange={(e) => update.mutate({ uid: it.uid!, patch: { status: e.target.value as ItemStatus } })}>
+              <select className="h-9 rounded-md border bg-background px-2" value={it.status} onChange={(e) => update.mutate({ uid: it.uid, patch: { status: e.target.value as ItemStatus } })}>
                 {(Object.keys(statusLabels) as ItemStatus[]).map((s) => <option key={s} value={s}>{statusLabels[s]}</option>)}
               </select>
-              <select className="h-9 rounded-md border bg-background px-2" value={it.access} onChange={(e) => update.mutate({ uid: it.uid!, patch: { access: e.target.value as AccessLevel } })}>
+              <select className="h-9 rounded-md border bg-background px-2" value={it.access} onChange={(e) => update.mutate({ uid: it.uid, patch: { access: e.target.value as AccessLevel } })}>
                 {(Object.keys(accessLabels) as AccessLevel[]).map((a) => <option key={a} value={a}>{accessLabels[a]}</option>)}
               </select>
-              <select className="h-9 rounded-md border bg-background px-2" value={it.collection} onChange={(e) => update.mutate({ uid: it.uid!, patch: { collection: e.target.value } })}>
+              <select className="h-9 rounded-md border bg-background px-2" value={it.collection} onChange={(e) => update.mutate({ uid: it.uid, patch: { collection: e.target.value } })}>
                 {collections.map((c) => <option key={c.slug} value={c.slug}>{c.title}</option>)}
               </select>
-              {isAdmin && <button onClick={() => remove(it)} className="rounded-md border border-destructive px-3 py-1.5 text-destructive">حذف</button>}
+              <Button asChild variant="outline" size="sm"><Link to="/edit/$id" params={{ id: it.id }}>تعديل</Link></Button>
+              {isAdmin && <Button variant="destructive" size="sm" onClick={() => remove(it)}>حذف</Button>}
             </div>
           </div>
         ))}
@@ -244,4 +251,33 @@ function Stats() {
       </div>
     </div>
   );
+}
+
+function MessagesPanel() {
+  const qc = useQueryClient();
+  const { data = [], isLoading, isError } = useQuery({
+    queryKey: ["contact-messages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const update = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: "new" | "closed" }) => {
+      const { error } = await supabase.from("contact_messages").update({ status }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["contact-messages"] }); toast.success("تم تحديث الرسالة."); },
+    onError: () => toast.error("تعذر تحديث الرسالة."),
+  });
+  if (isLoading) return <p role="status">جارٍ تحميل الرسائل...</p>;
+  if (isError) return <p role="alert" className="text-destructive">تعذر تحميل الرسائل.</p>;
+  if (!data.length) return <p className="py-8 text-center text-muted-foreground">لا توجد رسائل بعد.</p>;
+  return <ul className="space-y-4">{data.map((m) => <li key={m.id} className="rounded-lg border bg-card p-4">
+    <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">{contactSubjects[m.subject as ContactSubject] ?? m.subject}</h2><span className="text-xs text-muted-foreground">{m.status === "new" ? "جديدة" : "مغلقة"} • {new Date(m.created_at).toLocaleDateString("ar-EG")}</span></div>
+    <p className="mt-2 text-sm">{m.full_name}</p><a href={`mailto:${m.email}`} dir="ltr" className="block break-all text-start text-sm text-primary underline">{m.email}</a>
+    <p className="mt-3 whitespace-pre-wrap break-words leading-7">{m.message}</p>
+    <Button variant="outline" size="sm" className="mt-3" disabled={update.isPending} onClick={() => update.mutate({ id: m.id, status: m.status === "new" ? "closed" : "new" })}>{m.status === "new" ? "إغلاق الرسالة" : "إعادة فتح الرسالة"}</Button>
+  </li>)}</ul>;
 }

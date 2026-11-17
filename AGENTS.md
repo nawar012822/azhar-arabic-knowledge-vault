@@ -37,3 +37,6 @@ use the editor.
 - Deliver private files as permission-scoped cached Blobs; download clicks stay synchronous for mobile and PDF rendering imports its matching worker dynamically.
 - Enforce last-administrator protection in a database trigger as well as the UI so direct and concurrent requests cannot bypass handover safety.
 - Cache role reads by user ID and invalidate them after role changes so account navigation reflects current permissions.
+
+- Use the shared ItemForm for deposits and edits; member edits preserve ownership and return pending/revision records to review, while staff edits retain status.
+- Contact messages require a signed-in sender and are persisted with sender/admin-only read access; only admins may change message status.

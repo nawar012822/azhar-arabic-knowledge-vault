@@ -17,6 +17,8 @@ export const Route = createFileRoute("/auth")({
   },
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "تسجيل الدخول وإنشاء حساب – المستودع الرقمي" },
       { name: "description", content: "سجّل الدخول أو أنشئ حسابًا في المستودع الرقمي لكلية اللغة العربية بشبين الكوم لإيداع المواد وتحميلها." },
       { property: "og:title", content: "تسجيل الدخول – المستودع الرقمي" },

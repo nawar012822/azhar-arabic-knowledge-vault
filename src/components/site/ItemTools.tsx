@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Bookmark, Check, Copy, Download, Eye, Quote, Share2 } from "lucide-react";
+import { Bookmark, Check, Copy, Download, Eye, Pencil, Quote, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { canDownload, type Item } from "@/data/repository";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,6 +11,7 @@ import { deliverFile } from "@/lib/download";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { PdfReader } from "@/components/site/PdfReader";
+import { canEditItem } from "@/lib/permissions";
 
 function FilePreview({ blob, filename }: { blob: Blob; filename: string }) {
   const [url, setUrl] = useState("");
@@ -26,7 +27,7 @@ function FilePreview({ blob, filename }: { blob: Blob; filename: string }) {
 }
 
 export function ItemTools({ item }: { item: Item }) {
-  const { user } = useAuth();
+  const { user, roles } = useAuth();
   const qc = useQueryClient();
   const allowed = canDownload(item.access, Boolean(user));
   const uid = item.uid;
@@ -84,6 +85,7 @@ export function ItemTools({ item }: { item: Item }) {
   return (
     <div className="mt-6">
       <div className="flex flex-wrap gap-2">
+        {canEditItem(roles, user?.id, item.submittedBy, item.status) && <Button asChild variant="outline"><Link to="/edit/$id" params={{ id: item.id }}><Pencil />تعديل المادة</Link></Button>}
         <Button disabled={!allowed || !file.data} onClick={() => setViewer(true)}><Eye />عرض الملف</Button>
         <Button variant="outline" disabled={!allowed || !file.data} onClick={download}><Download />تحميل الملف</Button>
         {user ? <Button variant="outline" disabled={!uid || favorite.isLoading || toggle.isPending} aria-pressed={Boolean(favorite.data)} onClick={() => toggle.mutate()}><Bookmark />{favorite.data ? "إزالة من المفضلة" : "إضافة للمفضلة ☆"}</Button> : <Button asChild variant="outline"><Link to="/auth" search={{ redirect: `/items/${item.id}` }}><Bookmark />إضافة للمفضلة ☆</Link></Button>}

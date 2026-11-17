@@ -22,6 +22,7 @@ import { Route as AuthenticatedMyRouteImport } from './routes/_authenticated/my'
 import { Route as AuthenticatedSubmitRouteImport } from './routes/_authenticated/submit'
 import { Route as CollectionsSlugRouteImport } from './routes/collections.$slug'
 import { Route as ItemsIdRouteImport } from './routes/items.$id'
+import { Route as AuthenticatedEditIdRouteImport } from './routes/_authenticated/edit.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -87,6 +88,11 @@ const ItemsIdRoute = ItemsIdRouteImport.update({
   path: '/items/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedEditIdRoute = AuthenticatedEditIdRouteImport.update({
+  id: '/edit/$id',
+  path: '/edit/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/items/$id': typeof ItemsIdRoute
+  '/edit/$id': typeof AuthenticatedEditIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/items/$id': typeof ItemsIdRoute
+  '/edit/$id': typeof AuthenticatedEditIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/_authenticated/submit': typeof AuthenticatedSubmitRoute
   '/collections/$slug': typeof CollectionsSlugRoute
   '/items/$id': typeof ItemsIdRoute
+  '/_authenticated/edit/$id': typeof AuthenticatedEditIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/collections/$slug'
     | '/items/$id'
+    | '/edit/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/collections/$slug'
     | '/items/$id'
+    | '/edit/$id'
   id:
     | '__root__'
     | '/'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/_authenticated/submit'
     | '/collections/$slug'
     | '/items/$id'
+    | '/_authenticated/edit/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -284,6 +296,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ItemsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/edit/$id': {
+      id: '/_authenticated/edit/$id'
+      path: '/edit/$id'
+      fullPath: '/edit/$id'
+      preLoaderRoute: typeof AuthenticatedEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -291,12 +310,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedMyRoute: typeof AuthenticatedMyRoute
   AuthenticatedSubmitRoute: typeof AuthenticatedSubmitRoute
+  AuthenticatedEditIdRoute: typeof AuthenticatedEditIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedMyRoute: AuthenticatedMyRoute,
   AuthenticatedSubmitRoute: AuthenticatedSubmitRoute,
+  AuthenticatedEditIdRoute: AuthenticatedEditIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

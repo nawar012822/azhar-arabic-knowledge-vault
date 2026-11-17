@@ -15,6 +15,13 @@
       "when": 1794846742390,
       "tag": "0001_protect_last_administrator",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794923945948,
+      "tag": "0002_repository_contact_messages",
+      "breakpoints": true
     }
   ]
 }

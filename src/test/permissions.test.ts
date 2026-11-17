@@ -1,7 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { canDeleteItems, canManageUsers, canReview, canRemoveAdmin, defaultAccessFor, initialStatus } from "@/lib/permissions";
+import { canDeleteItems, canEditItem, canManageUsers, canReview, canRemoveAdmin, defaultAccessFor, initialStatus } from "@/lib/permissions";
 
 describe("roles and permissions", () => {
+  it("owners edit and resubmit only their pending or revision items", () => {
+    expect(canEditItem(["user"], "owner", "owner", "revision")).toBe(true);
+    expect(canEditItem(["user"], "owner", "owner", "pending")).toBe(true);
+    expect(canEditItem(["user"], "other", "owner", "pending")).toBe(false);
+    expect(canEditItem(["user"], "owner", "owner", "approved")).toBe(false);
+    expect(canEditItem(["user"], "owner", "owner", "rejected")).toBe(false);
+    expect(canEditItem(["admin"], undefined, "owner", "pending")).toBe(false);
+  });
+  it("staff can edit published records", () => {
+    expect(canEditItem(["moderator"], "staff", "owner", "approved")).toBe(true);
+    expect(canEditItem(["admin"], "staff", "owner", "rejected")).toBe(true);
+  });
   it("keeps the last administrator and allows a handover after adding another", () => {
     expect(canRemoveAdmin(1)).toBe(false);
     expect(canRemoveAdmin(2)).toBe(true);

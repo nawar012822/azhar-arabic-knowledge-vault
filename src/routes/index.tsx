@@ -9,6 +9,10 @@ import logo from "@/assets/college_building.jpg.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: logo.url },
+      { name: "twitter:image", content: logo.url },
       { title: "المستودع الرقمي لكلية اللغة العربية – جامعة الأزهر – شبين الكوم" },
       { name: "description", content: "ابحث في الكتب والرسائل الجامعية والأبحاث والمخطوطات الخاصة بكلية اللغة العربية بشبين الكوم." },
       { property: "og:title", content: "المستودع الرقمي لكلية اللغة العربية – شبين الكوم" },

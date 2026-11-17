@@ -11,10 +11,14 @@ import { ItemCard, AccessBadge, StatusBadge } from "@/components/site/ItemCard";
 import { PageShell } from "@/components/site/Layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { canEditItem } from "@/lib/permissions";
 
 export const Route = createFileRoute("/_authenticated/my")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "حسابي – المستودع الرقمي" },
       { name: "description", content: "بياناتك الشخصية وموادك المودعة وقائمة المفضلة في المستودع الرقمي." },
       { property: "og:title", content: "حسابي – المستودع الرقمي" },
@@ -66,12 +70,13 @@ function ProfileCard({ userId, email }: { userId: string; email: string }) {
         <Label htmlFor="o">معرّف ORCID (اختياري)</Label>
         <Input id="o" dir="ltr" placeholder="0000-0000-0000-0000" value={orcid} onChange={(e) => setOrcid(e.target.value)} />
       </div>
-      <button disabled={save.isPending} className="w-full rounded-md bg-primary py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">حفظ</button>
+      <Button type="submit" disabled={save.isPending} className="w-full">حفظ</Button>
     </form>
   );
 }
 
 function MySubmissions({ userId }: { userId: string }) {
+  const { roles } = useAuth();
   const { data = [], isLoading } = useQuery(myItemsQuery(userId));
   return (
     <section>
@@ -92,6 +97,7 @@ function MySubmissions({ userId }: { userId: string }) {
               </div>
               <Link to="/items/$id" params={{ id: it.id }} className="mt-2 block font-display text-lg font-bold text-primary">{it.title}</Link>
               {it.reviewNote && <p className="mt-2 rounded bg-muted p-2 text-sm">ملاحظة المراجع: {it.reviewNote}</p>}
+              {canEditItem(roles, userId, it.submittedBy, it.status) && <Button asChild variant="outline" size="sm" className="mt-3"><Link to="/edit/$id" params={{ id: it.id }}>تعديل المادة</Link></Button>}
             </li>
           ))}
         </ul>
