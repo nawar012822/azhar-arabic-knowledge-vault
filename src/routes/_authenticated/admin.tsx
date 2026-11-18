@@ -61,7 +61,7 @@ function AdminPage() {
 function useUpdateItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ uid, patch }: { uid?: string; patch: { status?: ItemStatus; access?: AccessLevel; review_note?: string | null; collection?: string } }) => {
+    mutationFn: async ({ uid, patch }: { uid: string | undefined; patch: { status?: ItemStatus; access?: AccessLevel; review_note?: string | null; collection?: string } }) => {
       if (!uid) throw new Error("المادة غير موجودة.");
       const { error } = await supabase.from("items").update(patch).eq("id", uid);
       if (error) throw error;
@@ -72,11 +72,12 @@ function useUpdateItem() {
 }
 
 function ReviewQueue() {
-  const { data = [], isLoading } = useQuery(allItemsQuery);
+  const { data = [], isLoading, isError, refetch } = useQuery(allItemsQuery);
   const queue = data.filter((x) => x.status === "pending" || x.status === "revision");
   const update = useUpdateItem();
   const [notes, setNotes] = useState<Record<string, string>>({});
   if (isLoading) return <p className="text-muted-foreground">جارٍ التحميل...</p>;
+  if (isError) return <LoadError onRetry={() => void refetch()} />;
   if (queue.length === 0) return <p className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">لا توجد إيداعات تنتظر المراجعة ✓</p>;
   return (
     <ul className="space-y-4">
@@ -101,22 +102,28 @@ function ReviewQueue() {
 function AllItems() {
   const { isAdmin } = useAuth();
   const qc = useQueryClient();
-  const { data = [] } = useQuery(allItemsQuery);
+  const { data = [], isLoading, isError, refetch } = useQuery(allItemsQuery);
   const update = useUpdateItem();
   const [q, setQ] = useState("");
   const shown = data.filter((x) => !q || x.title.includes(q) || x.author.includes(q) || x.id.includes(q));
   const remove = async (it: Item) => {
     if (!it.uid) return;
     if (!confirm(`حذف «${it.title}» نهائيًا؟`)) return;
-    if (it.filePath) await supabase.storage.from("files").remove([it.filePath]);
+    if (it.filePath) {
+      const { error } = await supabase.storage.from("files").remove([it.filePath]);
+      if (error) { toast.error("تعذر حذف الملف المرفق؛ لم تُحذف المادة."); return; }
+    }
     const { error } = await supabase.from("items").delete().eq("id", it.uid);
     if (error) { toast.error("تعذر الحذف."); return; }
     toast.success("تم الحذف.");
     qc.invalidateQueries({ queryKey: ["items"] });
   };
+  if (isLoading) return <p role="status">جارٍ تحميل المواد...</p>;
+  if (isError) return <LoadError onRetry={() => void refetch()} />;
   return (
     <div>
       <Input placeholder="ابحث بالعنوان أو المؤلف أو المعرف..." value={q} onChange={(e) => setQ(e.target.value)} className="mb-4 max-w-md" />
+      {!shown.length && <p className="py-8 text-center text-muted-foreground">لا توجد مواد مطابقة.</p>}
       <div className="space-y-3">
         {shown.map((it) => (
           <div key={it.id} className="grid gap-3 rounded-lg border bg-card p-4 md:grid-cols-[1fr_auto]">
@@ -149,7 +156,7 @@ interface Member { id: string; full_name: string; email: string; created_at: str
 function UsersPanel() {
   const { user } = useAuth();
   const qc = useQueryClient();
-  const { data: members = [], isLoading } = useQuery({
+  const { data: members = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["members"],
     queryFn: async (): Promise<Member[]> => {
       const [p, r] = await Promise.all([
@@ -180,6 +187,7 @@ function UsersPanel() {
   };
 
   if (isLoading) return <p className="text-muted-foreground">جارٍ التحميل...</p>;
+  if (isError) return <LoadError onRetry={() => void refetch()} />;
   const shown = members.filter((m) => !q || m.full_name.includes(q) || m.email.includes(q));
   return (
     <div>
@@ -221,13 +229,15 @@ function UsersPanel() {
 }
 
 function Stats() {
-  const { data = [] } = useQuery(allItemsQuery);
+  const { data = [], isLoading, isError, refetch } = useQuery(allItemsQuery);
   const by = (s: ItemStatus) => data.filter((x) => x.status === s).length;
   const cards = [
     ["كل المواد", data.length], ["منشورة", by("approved")], ["قيد المراجعة", by("pending")], ["مطلوب تعديل", by("revision")],
     ["المشاهدات", data.reduce((s, x) => s + x.views, 0)], ["التحميلات", data.reduce((s, x) => s + (x.downloads ?? 0), 0)],
   ] as const;
   const top = [...data].sort((a, b) => b.views - a.views).slice(0, 5);
+  if (isLoading) return <p role="status">جارٍ تحميل الإحصائيات...</p>;
+  if (isError) return <LoadError onRetry={() => void refetch()} />;
   return (
     <div className="space-y-8">
       <Button variant="outline" onClick={() => {
@@ -255,7 +265,7 @@ function Stats() {
 
 function MessagesPanel() {
   const qc = useQueryClient();
-  const { data = [], isLoading, isError } = useQuery({
+  const { data = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["contact-messages"],
     queryFn: async () => {
       const { data, error } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
@@ -272,7 +282,7 @@ function MessagesPanel() {
     onError: () => toast.error("تعذر تحديث الرسالة."),
   });
   if (isLoading) return <p role="status">جارٍ تحميل الرسائل...</p>;
-  if (isError) return <p role="alert" className="text-destructive">تعذر تحميل الرسائل.</p>;
+  if (isError) return <LoadError onRetry={() => void refetch()} />;
   if (!data.length) return <p className="py-8 text-center text-muted-foreground">لا توجد رسائل بعد.</p>;
   return <ul className="space-y-4">{data.map((m) => <li key={m.id} className="rounded-lg border bg-card p-4">
     <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-semibold">{contactSubjects[m.subject as ContactSubject] ?? m.subject}</h2><span className="text-xs text-muted-foreground">{m.status === "new" ? "جديدة" : "مغلقة"} • {new Date(m.created_at).toLocaleDateString("ar-EG")}</span></div>
@@ -280,4 +290,8 @@ function MessagesPanel() {
     <p className="mt-3 whitespace-pre-wrap break-words leading-7">{m.message}</p>
     <Button variant="outline" size="sm" className="mt-3" disabled={update.isPending} onClick={() => update.mutate({ id: m.id, status: m.status === "new" ? "closed" : "new" })}>{m.status === "new" ? "إغلاق الرسالة" : "إعادة فتح الرسالة"}</Button>
   </li>)}</ul>;
+}
+
+function LoadError({ onRetry }: { onRetry: () => void }) {
+  return <div role="alert" className="flex flex-wrap items-center gap-3 py-6"><p className="text-destructive">تعذر تحميل البيانات. تحقق من اتصالك وحاول مرة أخرى.</p><Button variant="outline" onClick={onRetry}>إعادة المحاولة</Button></div>;
 }

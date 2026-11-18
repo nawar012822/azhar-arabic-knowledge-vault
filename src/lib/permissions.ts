@@ -27,6 +27,11 @@ export function initialStatus(roles: Role[]): ItemStatus {
   return canReview(roles) ? "approved" : "pending";
 }
 
+/** تعديل العضو يعيد المادة للمراجعة؛ تعديل المشرف يحتفظ بحالتها. */
+export function editedStatus(roles: Role[], status: ItemStatus | undefined): ItemStatus {
+  return canReview(roles) ? status ?? "pending" : "pending";
+}
+
 /** الرسائل الجامعية لا تُتاح للتحميل افتراضيًا (بيانات وصفية فقط). */
 export function defaultAccessFor(collection: string) {
   return collection === "theses" ? "metadata" : "restricted";

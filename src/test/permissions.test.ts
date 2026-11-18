@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { canDeleteItems, canEditItem, canManageUsers, canReview, canRemoveAdmin, defaultAccessFor, initialStatus } from "@/lib/permissions";
+import { canDeleteItems, canEditItem, canManageUsers, canReview, canRemoveAdmin, defaultAccessFor, editedStatus, initialStatus } from "@/lib/permissions";
 
 describe("roles and permissions", () => {
+  it("member edits return revision records to pending review", () => {
+    expect(editedStatus(["user"], "revision")).toBe("pending");
+    expect(editedStatus(["user"], "pending")).toBe("pending");
+  });
+  it("staff edits retain the existing review status", () => {
+    expect(editedStatus(["moderator"], "approved")).toBe("approved");
+    expect(editedStatus(["admin"], "revision")).toBe("revision");
+    expect(editedStatus(["admin"], "rejected")).toBe("rejected");
+  });
   it("owners edit and resubmit only their pending or revision items", () => {
     expect(canEditItem(["user"], "owner", "owner", "revision")).toBe(true);
     expect(canEditItem(["user"], "owner", "owner", "pending")).toBe(true);

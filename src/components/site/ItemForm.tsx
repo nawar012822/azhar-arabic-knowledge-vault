@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { accessLabels, collections, departments, type AccessLevel, type Item } from "@/data/repository";
-import { canEditItem, defaultAccessFor, initialStatus } from "@/lib/permissions";
+import { canEditItem, defaultAccessFor, editedStatus, initialStatus } from "@/lib/permissions";
 import { PageShell } from "@/components/site/Layout";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,7 +62,7 @@ export function ItemForm({ item }: { item?: Item }) {
         if (error) throw new Error("تعذر رفع الملف: " + error.message);
         format = ext === "pdf" ? "PDF" : ext.toUpperCase();
       }
-      const status = item ? (isStaff ? item.status ?? "pending" : "pending") : initialStatus(roles);
+      const status = item ? editedStatus(roles, item.status) : initialStatus(roles);
       const record = {
         title: f.title.trim(), author: f.author.trim(), orcid: f.orcid.trim() || null, contributors: list(f.contributors),
         supervisor: f.supervisor.trim() || null, collection: f.collection, department: f.department,
